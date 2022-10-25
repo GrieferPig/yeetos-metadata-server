@@ -6,14 +6,18 @@
  */
 
 // TODO: Rewrite in Rust for efficiency
+const process = require('process');
+const dirname = process.cwd()
+
 let http = require('http');
 let fs = require('fs');
 let path = require('path')
 let eol = require('os').EOL
+let chokidar = require('chokidar');
 
 const LISTEN_PORT = 54088;
 
-const META_DIR = __dirname;
+const META_DIR = dirname;
 const META_FILE_NAME = "yeetos.metadata.json";
 const META_FILE_PATH = path.join(META_DIR, META_FILE_NAME);
 
@@ -51,20 +55,20 @@ async function cli() {
 }
 
 async function fileListener(reload_callback) {
-    fs.watch(META_DIR, { recursive: true }, (eventType, file) => {
+    chokidar.watch(".").on("all", (eventType, file) => {
         if (file === META_FILE_NAME && eventType === "change") {
-            l(INFO, `${META_FILE_NAME} changed, reloading.`);
+            l(INFO, `${file} changed, reloading.`);
             reload_callback();
         }
     });
 }
 
 function clearLog() {
-    let files = fs.readdirSync(__dirname);
+    let files = fs.readdirSync(dirname);
     let counter = 0;
     files = files.forEach(e => {
         if (e.endsWith(".log") && e !== `${LOG_FILE_NAME}`) {
-            fs.unlinkSync(path.join(__dirname, e));
+            fs.unlinkSync(path.join(dirname, e));
             counter++;
         }
     });
@@ -104,7 +108,7 @@ function determineLogLevel(level) {
 function l(level, msg) {
     let log_msg = `[${getTimeStamp()}] ${determineLogLevel(level)} ${msg}`;
     console.log(log_msg);
-    fs.appendFile(path.join(__dirname, LOG_FILE_NAME), log_msg + eol, err => {
+    fs.appendFile(path.join(dirname, LOG_FILE_NAME), log_msg + eol, err => {
         if (err) {
             console.log(`[${getTimeStamp()}] ERROR: write log fault: ${err}`)
         }
