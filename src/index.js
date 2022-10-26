@@ -57,6 +57,10 @@ async function cli() {
             case "req":
                 l("INFO", `Request Counter = ${req_counter / 2}`);
                 break;
+            case "resetreq":
+                req_counter = 0;
+                l("INFO", `Request Counter reset`);
+                break;
             default:
                 l(ERROR, `unknown command ${data}`);
         }
