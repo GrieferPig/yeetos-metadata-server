@@ -17,7 +17,7 @@ const chokidar = require('chokidar');
 const crypto = require('crypto')
 const minify = require("jsonminify");
 
-const LISTEN_PORT = 54088;
+const LISTEN_PORT = 888;
 
 const META_DIR = dirname;
 const META_FILE_NAME = "yeetos.metadata.json";
@@ -28,10 +28,13 @@ const LOG_FILE_NAME = `${getTimeStampRaw()}.log`;
 let body = "";
 let body_hash = "";
 
+let req_counter = 0;
+
 async function createServer(port) {
     var server = http.createServer((request, response) => {
         response.write(`${body}{$:${body_hash}}`);
         response.end();
+        req_counter++;
     })
 
     server.listen(port, '0.0.0.0');
@@ -50,6 +53,9 @@ async function cli() {
                 break;
             case "clearlog":
                 clearLog();
+                break;
+            case "req":
+                l("INFO", `Request Counter = ${req_counter / 2}`);
                 break;
             default:
                 l(ERROR, `unknown command ${data}`);
