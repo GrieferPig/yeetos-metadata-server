@@ -9,11 +9,13 @@
 const process = require('process');
 const dirname = process.cwd()
 
-let http = require('http');
-let fs = require('fs');
-let path = require('path')
-let eol = require('os').EOL
-let chokidar = require('chokidar');
+const http = require('http');
+const fs = require('fs');
+const path = require('path')
+const eol = require('os').EOL
+const chokidar = require('chokidar');
+const crypto = require('crypto')
+const minify = require("jsonminify");
 
 const LISTEN_PORT = 54088;
 
@@ -23,11 +25,12 @@ const META_FILE_PATH = path.join(META_DIR, META_FILE_NAME);
 
 const LOG_FILE_NAME = `${getTimeStampRaw()}.log`;
 
-let body = "WDNMD NMSL";
+let body = "";
+let body_hash = "";
 
 async function createServer(port) {
     var server = http.createServer((request, response) => {
-        response.write(body);
+        response.write(`${body}{$:${body_hash}}`);
         response.end();
     })
 
@@ -76,8 +79,9 @@ function clearLog() {
 }
 
 function reloadCallback() {
-    body = fs.readFileSync(META_FILE_PATH);
-    l(INFO, `metadata reloaded`)
+    body = minify(fs.readFileSync(META_FILE_PATH).toString());
+    body_hash = encryptMD5(body)
+    l(INFO, `metadata reloaded, new MD5 ${body_hash}`)
 }
 
 function getTimeStamp() {
@@ -113,6 +117,11 @@ function l(level, msg) {
             console.log(`[${getTimeStamp()}] ERROR: write log fault: ${err}`)
         }
     })
+}
+
+function encryptMD5(data) {
+    let md5 = crypto.createHash('md5');
+    return md5.update(data).digest('hex');
 }
 
 async function main() {

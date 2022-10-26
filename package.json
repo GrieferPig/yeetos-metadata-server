@@ -9,6 +9,7 @@
   "author": "GrieferPig",
   "license": "ISC",
   "dependencies": {
-    "chokidar": "^3.5.3"
+    "chokidar": "^3.5.3",
+    "jsonminify": "^0.4.2"
   }
 }
